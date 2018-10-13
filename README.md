@@ -13,7 +13,7 @@ You will be able to:
 
 Your boss gives you a general description of some of the datasets at your disposal for analyzing weekly store sales. They're eventually looking for you to build a model to help determine what factors impact sales, and model future sales forecasting for business planning.  
   
-Most of the properietary store data sits in the company sql database, accessible by all managers and above. Your boss provides you with the following basic schema:  
+Most of the properietary store data sits in the company sql database, accessible by all managers and above. The database is called **Walmart.db** Your boss provides you with the following basic schema:  
 
 <img src='db_schema.jpg' width=500>  
 
