@@ -15,7 +15,7 @@ Your boss gives you a general description of some of the datasets at your dispos
   
 Most of the properietary store data sits in the company sql database, accessible by all managers and above. The database is called **Walmart.db** Your boss provides you with the following basic schema:  
 
-<img src='db_schema.jpg' width=500>  
+<img src='images/db_schema.jpg' width=500>  
 
 She then tells you that she's put together a second dataset on general economy statistics for the various dates that she would also like you to incorporate in your analysis. That data, she says, is stored in a file **economy_data.csv**.
 
