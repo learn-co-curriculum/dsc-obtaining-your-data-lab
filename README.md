@@ -11,17 +11,9 @@ You will be able to:
 
 ## Task Description
 
-Your boss gives you a general description of some of the datasets at your disposal for analyzing weekly store sales. They're eventually looking for you to build a model to help determine what factors impact sales, and model future sales forecasting for business planning.  
-  
-Most of the properietary store data sits in the company sql database, accessible by all managers and above. The database is called **Walmart.db** Your boss provides you with the following basic schema:  
+You just got hired by Lego! Your first project is going to be to develop a pricing algorithm to help set a target price for new lego sets that are released to market. To do this, you're first going to need to start mining the company database in order to collect the information you need to develop a model.
 
-<img src='images/db_schema.jpg' width=500>  
-
-She then tells you that she's put together a second dataset on general economy statistics for the various dates that she would also like you to incorporate in your analysis. That data, she says, is stored in a file **economy_data.csv**.
-
-As a first step in creating your model for providing recommendations and projections, load and synthesize these disperate datasets into a singular unified DataFrame. Then save your results to a file **Merged_Store_Data.csv**.
-
-Make sure you check the various data types and merge appropriately.
+Start by investigating the database stored in `lego.db` and joining the tables into a unified dataset!
 
 
 ```python
