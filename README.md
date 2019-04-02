@@ -1,5 +1,5 @@
 
-# Obtaining Our Data - Lab
+# Obtaining Your Data - Lab
 
 ## Introduction
 In this lab you'll practice your munging and transforming skills in order to load in your data to solve a regression problem.
@@ -29,4 +29,4 @@ Make sure you check the various data types and merge appropriately.
 ```
 
 ## Summary
-Nice work! You're working more and more independently through the workflow, and ensuring data integrity!
+Nice work! You're working more and more independently through the workflow and ensuring data integrity!
