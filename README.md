@@ -1,5 +1,5 @@
 
-# Obtaining Our Data - Lab
+# Obtaining Your Data - Lab
 
 ## Introduction
 In this lab you'll practice your munging and transforming skills in order to load in your data to solve a regression problem.
@@ -565,4 +565,4 @@ merged.to_csv('Merged_Store_Data.csv', index=False)
 ```
 
 ## Summary
-Nice work! You're working more and more independently through the workflow, and ensuring data integrity!
+Nice work! You're working more and more independently through the workflow and ensuring data integrity!
