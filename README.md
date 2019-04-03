@@ -13,7 +13,14 @@ You will be able to:
 
 You just got hired by Lego! Your first project is going to be to develop a pricing algorithm to help set a target price for new lego sets that are released to market. To do this, you're first going to need to start mining the company database in order to collect the information you need to develop a model.
 
-Start by investigating the database stored in `lego.db` and joining the tables into a unified dataset!
+Start by investigating the database stored in lego.db and joining the tables into a unified dataset!
+
+> **Hint:** use this sql statement to preview the tables in an unknown database:
+```sql
+SELECT name FROM sqlite_master
+             WHERE type='table'
+             ORDER BY name;
+```
 
 
 ```python
