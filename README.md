@@ -11,17 +11,16 @@ You will be able to:
 
 ## Task Description
 
-Your boss gives you a general description of some of the datasets at your disposal for analyzing weekly store sales. They're eventually looking for you to build a model to help determine what factors impact sales, and model future sales forecasting for business planning.  
-  
-Most of the properietary store data sits in the company sql database, accessible by all managers and above. The database is called **Walmart.db** Your boss provides you with the following basic schema:  
+You just got hired by Lego! Your first project is going to be to develop a pricing algorithm to help set a target price for new lego sets that are released to market. To do this, you're first going to need to start mining the company database in order to collect the information you need to develop a model.
 
-<img src='images/db_schema.jpg' width=500>  
+Start by investigating the database stored in lego.db and joining the tables into a unified dataset!
 
-She then tells you that she's put together a second dataset on general economy statistics for the various dates that she would also like you to incorporate in your analysis. That data, she says, is stored in a file **economy_data.csv**.
-
-As a first step in creating your model for providing recommendations and projections, load and synthesize these disperate datasets into a singular unified DataFrame. Then save your results to a file **Merged_Store_Data.csv**.
-
-Make sure you check the various data types and merge appropriately.
+> **Hint:** use this sql statement to preview the tables in an unknown database:
+```sql
+SELECT name FROM sqlite_master
+             WHERE type='table'
+             ORDER BY name;
+```
 
 
 ```python
@@ -31,98 +30,230 @@ import pandas as pd
 
 
 ```python
-con = sqlite3.connect('Walmart.db')
-cur = con.cursor()
-cur.execute("""select * from sales join store_details using(store);""")
-df1 = pd.DataFrame(cur.fetchall())
-df1.columns = [i[0] for i in cur.description]
-print(df1.shape)
-df1.head()
+conn = sqlite3.connect('lego.db')
+c = conn.cursor()
+response = c.execute("""SELECT name FROM sqlite_master
+             WHERE type='table'
+             ORDER BY name;
+          """).fetchall()
+response
 ```
 
-    (452192, 7)
+
+
+
+    [('product_details',),
+     ('product_info',),
+     ('product_pricing',),
+     ('product_reviews',)]
+
+
+
+
+```python
+#Preview the tables:
+for item in response:
+    table = item[0]
+    length = c.execute("""SELECT count(*) from {};""".format(table)).fetchall()
+    results = c.execute("""SELECT * from {} limit 5;""".format(table)).fetchall()
+    df = pd.DataFrame(results)
+    df.columns = [x[0] for x in c.description]
+    print(table, length, '\n', df, '\n\n')
+```
+
+    product_details [(744,)] 
+        prod_id                          prod_desc  \
+    0      630                Everyone needs one!   
+    1     2304              Start creations here!   
+    2     7280      Add roads to your LEGO® town!   
+    3     7281       Roads for your LEGO® layout!   
+    4     7499  Get killer curves in your tracks!   
+    
+                                          prod_long_desc theme_name  
+    0  This tool makes it a snap to pull those small ...    Classic  
+    1  Even big imaginations need a place to start--a...     DUPLO®  
+    2  Expand your LEGO® town with this set of straig...       City  
+    3  Add a T-junction and curved roads to your LEGO...       City  
+    4  Add flexible train tracks to your locomotive s...       City   
+    
+    
+    product_info [(744,)] 
+        prod_id  ages  piece_count                         set_name
+    0      630    4+            1                  Brick Separator
+    1     2304  1½-5            1     LEGO® DUPLO® Green Baseplate
+    2     7280  5-12            2      Straight & Crossroad Plates
+    3     7281  5-12            2  T-Junction & Curved Road Plates
+    4     7499  5-12           24     Flexible and Straight Tracks 
+    
+    
+    product_pricing [(10870,)] 
+        prod_id country list_price
+    0    75823      US     $29.99
+    1    75822      US     $19.99
+    2    75821      US     $12.99
+    3    21030      US     $99.99
+    4    21035      US     $79.99 
+    
+    
+    product_reviews [(744,)] 
+        prod_id  num_reviews  play_star_rating review_difficulty  star_rating  \
+    0      630          180               4.0         Very Easy          4.8   
+    1     2304           15               4.4              Easy          4.0   
+    2     7280           85               4.1         Very Easy          3.5   
+    3     7281           40               4.1         Very Easy          3.9   
+    4     7499           89               2.9              Easy          2.5   
+    
+       val_star_rating  
+    0              4.6  
+    1              3.3  
+    2              2.3  
+    3              2.8  
+    4              2.2   
+    
+    
+
+
+
+```python
+cmd = """select * from product_info
+                  join product_details
+                  using(prod_id)
+                  join product_pricing
+                  using(prod_id)
+                  join product_reviews
+                  using(prod_id);"""
+result = c.execute(cmd).fetchall()
+df = pd.DataFrame(result)
+df.columns = [x[0] for x in c.description]
+print(len(df))
+df.head()
+```
+
+    10870
 
 
 
 
 
 <div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
     }
 
     .dataframe tbody tr th {
         vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
     }
 </style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>Store</th>
-      <th>Dept</th>
-      <th>Date</th>
-      <th>Weekly_Sales</th>
-      <th>IsHoliday</th>
-      <th>Type</th>
-      <th>Size</th>
+      <th>prod_id</th>
+      <th>ages</th>
+      <th>piece_count</th>
+      <th>set_name</th>
+      <th>prod_desc</th>
+      <th>prod_long_desc</th>
+      <th>theme_name</th>
+      <th>country</th>
+      <th>list_price</th>
+      <th>num_reviews</th>
+      <th>play_star_rating</th>
+      <th>review_difficulty</th>
+      <th>star_rating</th>
+      <th>val_star_rating</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>1</td>
-      <td>1</td>
-      <td>2010-02-05</td>
-      <td>24924.50</td>
-      <td>False</td>
-      <td>A</td>
-      <td>151315</td>
+      <td>75823</td>
+      <td>6-12</td>
+      <td>277</td>
+      <td>Bird Island Egg Heist</td>
+      <td>Catapult into action and take back the eggs fr...</td>
+      <td>Use the staircase catapult to launch Red into ...</td>
+      <td>Angry Birds™</td>
+      <td>US</td>
+      <td>$29.99</td>
+      <td>2.0</td>
+      <td>4.0</td>
+      <td>Average</td>
+      <td>4.5</td>
+      <td>4.0</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>1</td>
-      <td>1</td>
-      <td>2010-02-12</td>
-      <td>46039.49</td>
-      <td>True</td>
-      <td>A</td>
-      <td>151315</td>
+      <td>75822</td>
+      <td>6-12</td>
+      <td>168</td>
+      <td>Piggy Plane Attack</td>
+      <td>Launch a flying attack and rescue the eggs fro...</td>
+      <td>Pilot Pig has taken off from Bird Island with ...</td>
+      <td>Angry Birds™</td>
+      <td>US</td>
+      <td>$19.99</td>
+      <td>2.0</td>
+      <td>4.0</td>
+      <td>Easy</td>
+      <td>5.0</td>
+      <td>4.0</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>1</td>
-      <td>1</td>
-      <td>2010-02-19</td>
-      <td>41595.55</td>
-      <td>False</td>
-      <td>A</td>
-      <td>151315</td>
+      <td>75821</td>
+      <td>6-12</td>
+      <td>74</td>
+      <td>Piggy Car Escape</td>
+      <td>Chase the piggy with lightning-fast Chuck and ...</td>
+      <td>Pitch speedy bird Chuck against the Piggy Car....</td>
+      <td>Angry Birds™</td>
+      <td>US</td>
+      <td>$12.99</td>
+      <td>11.0</td>
+      <td>4.3</td>
+      <td>Easy</td>
+      <td>4.3</td>
+      <td>4.1</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>1</td>
-      <td>1</td>
-      <td>2010-02-26</td>
-      <td>19403.54</td>
-      <td>False</td>
-      <td>A</td>
-      <td>151315</td>
+      <td>21030</td>
+      <td>12+</td>
+      <td>1032</td>
+      <td>United States Capitol Building</td>
+      <td>Explore the architecture of the United States ...</td>
+      <td>Discover the architectural secrets of the icon...</td>
+      <td>Architecture</td>
+      <td>US</td>
+      <td>$99.99</td>
+      <td>23.0</td>
+      <td>3.6</td>
+      <td>Average</td>
+      <td>4.6</td>
+      <td>4.3</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>1</td>
-      <td>1</td>
-      <td>2010-03-05</td>
-      <td>21827.90</td>
-      <td>False</td>
-      <td>A</td>
-      <td>151315</td>
+      <td>21035</td>
+      <td>12+</td>
+      <td>744</td>
+      <td>Solomon R. Guggenheim Museum®</td>
+      <td>Recreate the Solomon R. Guggenheim Museum® wit...</td>
+      <td>Discover the architectural secrets of Frank Ll...</td>
+      <td>Architecture</td>
+      <td>US</td>
+      <td>$79.99</td>
+      <td>14.0</td>
+      <td>3.2</td>
+      <td>Challenging</td>
+      <td>4.6</td>
+      <td>4.1</td>
     </tr>
   </tbody>
 </table>
@@ -132,436 +263,33 @@ df1.head()
 
 
 ```python
-df2 = pd.read_csv('economy_data.csv')
-print(df2.shape)
-df2.head()
-```
-
-    (8190, 12)
-
-
-
-
-
-<div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Store</th>
-      <th>Date</th>
-      <th>Temperature</th>
-      <th>Fuel_Price</th>
-      <th>MarkDown1</th>
-      <th>MarkDown2</th>
-      <th>MarkDown3</th>
-      <th>MarkDown4</th>
-      <th>MarkDown5</th>
-      <th>CPI</th>
-      <th>Unemployment</th>
-      <th>IsHoliday</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>2010-02-05</td>
-      <td>42.31</td>
-      <td>2.572</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.096358</td>
-      <td>8.106</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>2010-02-12</td>
-      <td>38.51</td>
-      <td>2.548</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.242170</td>
-      <td>8.106</td>
-      <td>True</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1</td>
-      <td>2010-02-19</td>
-      <td>39.93</td>
-      <td>2.514</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.289143</td>
-      <td>8.106</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>1</td>
-      <td>2010-02-26</td>
-      <td>46.63</td>
-      <td>2.561</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.319643</td>
-      <td>8.106</td>
-      <td>False</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>1</td>
-      <td>2010-03-05</td>
-      <td>46.50</td>
-      <td>2.625</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.350143</td>
-      <td>8.106</td>
-      <td>False</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-#Naive Merge is Faulty
-merged = pd.merge(df1, df2)
-print(merged.shape)
-merged.head()
-```
-
-    (0, 16)
-
-
-
-
-
-<div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Store</th>
-      <th>Dept</th>
-      <th>Date</th>
-      <th>Weekly_Sales</th>
-      <th>IsHoliday</th>
-      <th>Type</th>
-      <th>Size</th>
-      <th>Temperature</th>
-      <th>Fuel_Price</th>
-      <th>MarkDown1</th>
-      <th>MarkDown2</th>
-      <th>MarkDown3</th>
-      <th>MarkDown4</th>
-      <th>MarkDown5</th>
-      <th>CPI</th>
-      <th>Unemployment</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-#Investigating
-df1.info()
+df.info()
 ```
 
     <class 'pandas.core.frame.DataFrame'>
-    RangeIndex: 452192 entries, 0 to 452191
-    Data columns (total 7 columns):
-    Store           452192 non-null int64
-    Dept            452192 non-null int64
-    Date            452192 non-null object
-    Weekly_Sales    452192 non-null float64
-    IsHoliday       452192 non-null object
-    Type            452192 non-null object
-    Size            452192 non-null int64
-    dtypes: float64(1), int64(3), object(3)
-    memory usage: 24.1+ MB
+    RangeIndex: 10870 entries, 0 to 10869
+    Data columns (total 14 columns):
+    prod_id              10870 non-null int64
+    ages                 10870 non-null object
+    piece_count          10870 non-null int64
+    set_name             10870 non-null object
+    prod_desc            10870 non-null object
+    prod_long_desc       10870 non-null object
+    theme_name           10870 non-null object
+    country              10870 non-null object
+    list_price           10870 non-null object
+    num_reviews          9449 non-null float64
+    play_star_rating     9321 non-null float64
+    review_difficulty    10870 non-null object
+    star_rating          9449 non-null float64
+    val_star_rating      9301 non-null float64
+    dtypes: float64(4), int64(2), object(8)
+    memory usage: 1.2+ MB
 
 
 
 ```python
-df2.info()
-```
-
-    <class 'pandas.core.frame.DataFrame'>
-    RangeIndex: 8190 entries, 0 to 8189
-    Data columns (total 12 columns):
-    Store           8190 non-null int64
-    Date            8190 non-null object
-    Temperature     8190 non-null float64
-    Fuel_Price      8190 non-null float64
-    MarkDown1       4032 non-null float64
-    MarkDown2       2921 non-null float64
-    MarkDown3       3613 non-null float64
-    MarkDown4       3464 non-null float64
-    MarkDown5       4050 non-null float64
-    CPI             7605 non-null float64
-    Unemployment    7605 non-null float64
-    IsHoliday       8190 non-null bool
-    dtypes: bool(1), float64(9), int64(1), object(1)
-    memory usage: 711.9+ KB
-
-
-
-```python
-common = [col for col in df1.columns if col in df2.columns]
-common
-```
-
-
-
-
-    ['Store', 'Date', 'IsHoliday']
-
-
-
-
-```python
-for col in common:
-    ex1 = df1[col].iloc[0]
-    ex2 = df2[col].iloc[0]
-    print(col)
-    print('Types:')
-    print('df1: {}, df2: {}'.format(type(ex1), type(ex2)))
-    print('\n')
-```
-
-    Store
-    Types:
-    df1: <class 'numpy.int64'>, df2: <class 'numpy.int64'>
-    
-    
-    Date
-    Types:
-    df1: <class 'str'>, df2: <class 'str'>
-    
-    
-    IsHoliday
-    Types:
-    df1: <class 'str'>, df2: <class 'numpy.bool_'>
-    
-    
-
-
-IsHoliday seems to be the culprit here; one is a string, the other a boolean.
-
-
-```python
-#Converting the datatype
-df1.IsHoliday = df1.IsHoliday.astype(bool)
-```
-
-
-```python
-#Remerging
-merged = pd.merge(df1, df2)
-print(merged.shape)
-merged.head()
-```
-
-    (31817, 16)
-
-
-
-
-
-<div>
-<style>
-    .dataframe thead tr:only-child th {
-        text-align: right;
-    }
-
-    .dataframe thead th {
-        text-align: left;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>Store</th>
-      <th>Dept</th>
-      <th>Date</th>
-      <th>Weekly_Sales</th>
-      <th>IsHoliday</th>
-      <th>Type</th>
-      <th>Size</th>
-      <th>Temperature</th>
-      <th>Fuel_Price</th>
-      <th>MarkDown1</th>
-      <th>MarkDown2</th>
-      <th>MarkDown3</th>
-      <th>MarkDown4</th>
-      <th>MarkDown5</th>
-      <th>CPI</th>
-      <th>Unemployment</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>1</td>
-      <td>2010-02-12</td>
-      <td>46039.49</td>
-      <td>True</td>
-      <td>A</td>
-      <td>151315</td>
-      <td>38.51</td>
-      <td>2.548</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.24217</td>
-      <td>8.106</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>2</td>
-      <td>2010-02-12</td>
-      <td>44682.74</td>
-      <td>True</td>
-      <td>A</td>
-      <td>151315</td>
-      <td>38.51</td>
-      <td>2.548</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.24217</td>
-      <td>8.106</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1</td>
-      <td>3</td>
-      <td>2010-02-12</td>
-      <td>10887.84</td>
-      <td>True</td>
-      <td>A</td>
-      <td>151315</td>
-      <td>38.51</td>
-      <td>2.548</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.24217</td>
-      <td>8.106</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>1</td>
-      <td>4</td>
-      <td>2010-02-12</td>
-      <td>35351.21</td>
-      <td>True</td>
-      <td>A</td>
-      <td>151315</td>
-      <td>38.51</td>
-      <td>2.548</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.24217</td>
-      <td>8.106</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>1</td>
-      <td>5</td>
-      <td>2010-02-12</td>
-      <td>29620.81</td>
-      <td>True</td>
-      <td>A</td>
-      <td>151315</td>
-      <td>38.51</td>
-      <td>2.548</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>211.24217</td>
-      <td>8.106</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-merged.to_csv('Merged_Store_Data.csv', index=False)
+df.to_csv('Lego_data_merged.csv', index=False)
 ```
 
 ## Summary
