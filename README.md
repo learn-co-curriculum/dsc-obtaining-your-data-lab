@@ -15,11 +15,11 @@ You just got hired by Lego! Your first project is going to be to develop a prici
 
 Start by investigating the database stored in lego.db and joining the tables into a unified dataset!
 
-> **Hint:** use this sql statement to preview the tables in an unknown database:
+> **Hint:** use this SQL query to preview the tables in an unknown database:
 ```sql
 SELECT name FROM sqlite_master
-             WHERE type='table'
-             ORDER BY name;
+            WHERE type='table'
+            ORDER BY name;
 ```
 
 
