@@ -6,8 +6,7 @@ In this lab you'll practice your munging and transforming skills in order to loa
 
 ## Objectives
 You will be able to:
-* Understand the ETL process and the steps it consists of
-* Understand the challenges of working with data from multiple sources 
+* Perform an ETL process with multiple tables and create a single dataset
 
 ## Task Description
 
@@ -304,4 +303,4 @@ df.to_csv('Lego_data_merged.csv', index=False)
 ```
 
 ## Summary
-Nice work! You're working more and more independently through the workflow and ensuring data integrity!
+Nice work! You're working more and more independently through the workflow and ensuring data integrity! In this lab, you successfully executed an ETL process to merge different tables!
